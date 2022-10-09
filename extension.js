@@ -3,7 +3,7 @@
 const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
 const Soup = imports.gi.Soup;
-const ByteArray = imports.byteArray;	// same as above
+const ByteArray = imports.byteArray;
 
 const St = imports.gi.St;
 const PanelMenu = imports.ui.panelMenu;
@@ -65,7 +65,6 @@ var LanIPAddressIndicator = class LanIPAddressIndicator extends PanelMenu.Button
         }
         this._timeout = Mainloop.timeout_add_seconds(refreshTime, () => {this._updateLabel();});
 
-        let session = new Soup.Session();
         let httpSession = new Soup.Session();
 
         let request = Soup.Message.new('GET', "https://api.ipify.org/");
