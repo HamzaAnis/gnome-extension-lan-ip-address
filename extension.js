@@ -2,6 +2,8 @@
 
 const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
+const Soup = imports.gi.Soup;
+const ByteArray = imports.byteArray;	// same as above
 
 const St = imports.gi.St;
 const PanelMenu = imports.ui.panelMenu;
@@ -55,7 +57,7 @@ var LanIPAddressIndicator = class LanIPAddressIndicator extends PanelMenu.Button
     }
 
     _updateLabel() {
-        const refreshTime = 5 // in seconds
+        const refreshTime = 10 // in seconds
 
         if (this._timeout) {
                 Mainloop.source_remove(this._timeout);
@@ -63,7 +65,20 @@ var LanIPAddressIndicator = class LanIPAddressIndicator extends PanelMenu.Button
         }
         this._timeout = Mainloop.timeout_add_seconds(refreshTime, () => {this._updateLabel();});
 
-        this.buttonText.set_text(_get_lan_ip());
+        let session = new Soup.Session();
+        let httpSession = new Soup.Session();
+
+        let request = Soup.Message.new('GET', "https://api.ipify.org/");
+
+        httpSession.send_and_read_async(request, Soup.MessagePriority.NORMAL, null, (session, response) => {
+            const status_code = request.get_status();
+            const bytes = httpSession.send_and_read_finish(response);
+            if (bytes) {
+                this.buttonText.set_text(ByteArray.toString(bytes.get_data()));
+            } else {
+                this.buttonText.set_text("Error!");
+            }
+        });
     }
 
     stop() {
@@ -96,4 +111,3 @@ function disable() {
     _indicator.destroy();
     _indicator = null;
 }
-
